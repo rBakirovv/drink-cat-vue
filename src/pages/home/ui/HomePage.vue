@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { UserRoundPlus } from '@lucide/vue'
 import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
 
+import PhoneDrawer from './PhoneDrawer.vue'
 import PopularDrinks from './PopularDrinks.vue'
 
 const popularDrinks = useTemplateRef<HTMLElement>('popularDrinks')
@@ -71,11 +71,8 @@ function handleTouchEnd(event: TouchEvent) {
     @touchcancel.capture="resetSwipe"
   >
     <section class="relative h-svh">
-      <header
-        aria-hidden="true"
-        class="pointer-events-none absolute top-4 right-4 z-10 flex size-11 items-center justify-center rounded-full bg-white text-black"
-      >
-        <UserRoundPlus class="size-5" />
+      <header class="absolute top-4 right-4 z-10">
+        <PhoneDrawer />
       </header>
 
       <video
