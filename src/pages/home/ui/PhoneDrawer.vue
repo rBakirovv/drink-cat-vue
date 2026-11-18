@@ -92,7 +92,7 @@ function focusPhone(event: Event) {
             inputmode="tel"
             autocomplete="tel"
             aria-label="Номер телефона"
-            class="h-12 md:text-base"
+            class="h-12 focus-visible:ring-0 md:text-base"
             @input="handlePhoneInput"
           />
         </div>
