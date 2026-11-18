@@ -7,7 +7,6 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -81,27 +80,23 @@ function focusPhone(event: Event) {
       </DrawerHeader>
 
       <form
-        class="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col overflow-y-auto"
+        class="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col gap-6 overflow-y-auto px-4"
         @submit.prevent="showCodeStatus = completePhone.test(phone)"
       >
-        <div class="px-4">
-          <Input
-            ref="phoneInput"
-            :model-value="phone"
-            type="tel"
-            inputmode="tel"
-            autocomplete="tel"
-            aria-label="Номер телефона"
-            class="h-12 focus-visible:ring-0 md:text-base"
-            @input="handlePhoneInput"
-          />
-        </div>
+        <Input
+          ref="phoneInput"
+          :model-value="phone"
+          type="tel"
+          inputmode="tel"
+          autocomplete="tel"
+          aria-label="Номер телефона"
+          class="h-12 shrink-0 focus-visible:ring-0 md:text-base"
+          @input="handlePhoneInput"
+        />
 
-        <DrawerFooter class="pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <Button type="submit" class="h-12 w-full" :disabled="!completePhone.test(phone)">
-            Получить код
-          </Button>
-        </DrawerFooter>
+        <Button type="submit" class="h-12 w-full" :disabled="!completePhone.test(phone)">
+          Получить код
+        </Button>
       </form>
 
       <DrawerClose as-child>
