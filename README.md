@@ -1,6 +1,6 @@
 # drink-cat-vue
 
-Фронтенд Drink Cat на Vue 3 и TypeScript. Пока приложение показывает стартовые страницы Vue: настроены маршрутизация, Pinia, shadcn-vue, Tailwind CSS и иконки Lucide.
+Фронтенд Drink Cat на Vue 3 и TypeScript. На главной странице доступны видео, карусель популярных напитков и форма ввода номера телефона.
 
 Договорённости по архитектуре, тестам и Git — в [конституции проекта](CLAUDE.md).
 
@@ -37,9 +37,10 @@ npm run dev
 | Путь | Что в нём |
 | --- | --- |
 | `src/main.ts` | Точка входа: Vue, Pinia и роутер |
-| `src/router/` и `src/views/` | Маршруты и экраны стартового шаблона |
-| `src/components/` и `src/stores/` | Компоненты и пример стора из шаблона Vue |
-| `src/shared/ui/` | Исходники компонентов shadcn-vue (добавлен Button) |
+| `src/router/` | Настройки маршрутизации |
+| `src/pages/home/` | Главная страница и её компоненты |
+| `src/entities/drink/` | Тип напитка и компонент карточки |
+| `src/shared/ui/` | Исходники компонентов shadcn-vue |
 | `src/shared/lib/` | Общие утилиты компонентов |
 | `components.json` | Настройки CLI shadcn-vue и алиасы FSD |
 | `e2e/` | Сценарии Playwright |
