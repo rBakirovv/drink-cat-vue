@@ -65,9 +65,9 @@ function handleTouchEnd(event: TouchEvent) {
 <template>
   <main
     class="bg-white text-neutral-900"
-    @touchstart.passive="handleTouchStart"
-    @touchend.passive="handleTouchEnd"
-    @touchcancel="resetSwipe"
+    @touchstart.capture.passive="handleTouchStart"
+    @touchend.capture.passive="handleTouchEnd"
+    @touchcancel.capture="resetSwipe"
   >
     <section class="relative h-svh">
       <video
@@ -79,13 +79,13 @@ function handleTouchEnd(event: TouchEvent) {
         playsinline
       ></video>
       <div
-        :style="{ height: `calc(12rem + ${scrollOffset}px)` }"
+        :style="{ height: `calc(28rem + ${scrollOffset}px)` }"
         aria-hidden="true"
-        class="pointer-events-none absolute inset-x-0 bottom-0 max-h-full bg-linear-to-t from-white via-white/70 to-transparent"
+        class="pointer-events-none absolute inset-x-0 bottom-0 max-h-full bg-linear-to-t from-white from-35% via-white/90 via-70% to-transparent"
       ></div>
     </section>
 
-    <div ref="popularDrinks" class="relative -mt-20">
+    <div ref="popularDrinks" class="relative -mt-80">
       <PopularDrinks />
     </div>
   </main>
