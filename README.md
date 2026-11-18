@@ -1,6 +1,6 @@
 # drink-cat-vue
 
-Фронтенд Drink Cat на Vue 3 и TypeScript. Пока приложение показывает стартовые страницы Vue: настроены маршрутизация, Pinia, компоненты Element Plus и иконки Lucide.
+Фронтенд Drink Cat на Vue 3 и TypeScript. Пока приложение показывает стартовые страницы Vue: настроены маршрутизация, Pinia, Element Plus, Tailwind CSS и иконки Lucide.
 
 Договорённости по архитектуре, тестам и Git — в [конституции проекта](CLAUDE.md).
 
