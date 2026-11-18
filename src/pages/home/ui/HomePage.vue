@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UserRoundPlus } from '@lucide/vue'
 import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
 
 import PopularDrinks from './PopularDrinks.vue'
@@ -70,6 +71,13 @@ function handleTouchEnd(event: TouchEvent) {
     @touchcancel.capture="resetSwipe"
   >
     <section class="relative h-svh">
+      <header
+        aria-hidden="true"
+        class="pointer-events-none absolute top-4 right-4 z-10 flex size-11 items-center justify-center rounded-full bg-white text-black"
+      >
+        <UserRoundPlus class="size-5" />
+      </header>
+
       <video
         class="h-full w-full object-cover"
         src="/videos/drink-cat-coffee.mp4"
