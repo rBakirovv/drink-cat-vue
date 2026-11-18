@@ -41,5 +41,14 @@ export default defineConfigWithVueTs(
     files: ['src/**/*.{vue,ts,mts,tsx}'],
   },
 
+  {
+    name: 'app/shadcn-ui',
+    files: ['src/shared/ui/**/*.vue'],
+    rules: {
+      // Keep the component names provided by the shadcn-vue registry.
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+
   skipFormatting,
 )

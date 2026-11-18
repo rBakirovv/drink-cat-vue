@@ -1,6 +1,6 @@
 # drink-cat-vue
 
-Фронтенд Drink Cat на Vue 3 и TypeScript. Пока приложение показывает стартовые страницы Vue: настроены маршрутизация, Pinia, Element Plus, Tailwind CSS и иконки Lucide.
+Фронтенд Drink Cat на Vue 3 и TypeScript. Пока приложение показывает стартовые страницы Vue: настроены маршрутизация, Pinia, shadcn-vue, Tailwind CSS и иконки Lucide.
 
 Договорённости по архитектуре, тестам и Git — в [конституции проекта](CLAUDE.md).
 
@@ -34,10 +34,23 @@ npm run dev
 
 | Путь | Что в нём |
 | --- | --- |
-| `src/main.ts` | Точка входа: Vue, Pinia, роутер и Element Plus |
+| `src/main.ts` | Точка входа: Vue, Pinia и роутер |
 | `src/router/` и `src/views/` | Маршруты и экраны стартового шаблона |
 | `src/components/` и `src/stores/` | Компоненты и пример стора из шаблона Vue |
+| `src/shared/ui/` | Исходники компонентов shadcn-vue (добавлен Button) |
+| `src/shared/lib/` | Общие утилиты компонентов |
+| `components.json` | Настройки CLI shadcn-vue и алиасы FSD |
 | `e2e/` | Сценарии Playwright |
 | `eslint.config.ts`, `.oxlintrc.json`, `.oxfmtrc.json` | Правила ESLint и FSD, Oxlint и форматирование |
 
 Новый код размещаем по FSD внутри `src/`. Слои и правила импортов описаны в [конституции проекта](CLAUDE.md#архитектура-fsd).
+
+## Компоненты интерфейса
+
+Используем [shadcn-vue](https://www.shadcn-vue.com/docs/installation/vite): компоненты добавляются в исходники проекта. Например:
+
+```sh
+npx shadcn-vue@latest add input dialog
+```
+
+CLI настроен на `src/shared/ui/`. Кнопка уже доступна через `import { Button } from '@/shared/ui/button'`. Компоненты импортируем локально; глобальной регистрации нет. Тема и Tailwind Preflight подключены в `src/assets/main.css`, тёмная тема следует системным настройкам.
