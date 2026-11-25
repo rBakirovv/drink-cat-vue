@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
 
+import CatMenu from './CatMenu.vue'
 import PhoneDrawer from './PhoneDrawer.vue'
 import PopularDrinks from './PopularDrinks.vue'
 
-const logoUrl = `${import.meta.env.BASE_URL}icons/drink-cat-mark.svg`
 const popularDrinks = useTemplateRef<HTMLElement>('popularDrinks')
 const scrollOffset = ref(0)
 let touchStart: { x: number; y: number; scrollY: number } | null = null
@@ -73,9 +73,7 @@ function handleTouchEnd(event: TouchEvent) {
   >
     <section class="relative h-svh">
       <header class="pointer-events-none absolute inset-x-4 top-4 z-10 flex justify-between">
-        <div class="grid size-11 place-items-center rounded-full bg-white">
-          <img :src="logoUrl" alt="Drink Cat" width="32" height="17" />
-        </div>
+        <CatMenu />
 
         <div class="pointer-events-auto">
           <PhoneDrawer />
