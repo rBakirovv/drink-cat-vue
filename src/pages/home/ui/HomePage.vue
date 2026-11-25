@@ -4,6 +4,7 @@ import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
 import CatMenu from './CatMenu.vue'
 import PhoneDrawer from './PhoneDrawer.vue'
 import PopularDrinks from './PopularDrinks.vue'
+import PwaInstallDialog from './PwaInstallDialog.vue'
 
 const popularDrinks = useTemplateRef<HTMLElement>('popularDrinks')
 const scrollOffset = ref(0)
@@ -98,5 +99,7 @@ function handleTouchEnd(event: TouchEvent) {
     <div ref="popularDrinks" class="relative -mt-80">
       <PopularDrinks />
     </div>
+
+    <PwaInstallDialog />
   </main>
 </template>
