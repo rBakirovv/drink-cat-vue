@@ -5,6 +5,15 @@ test('показывает популярные напитки на главно
   await expect(page.getByRole('heading', { name: 'популярные напитки' })).toBeVisible()
 })
 
+test('открывает описание и фото напитка из каталога', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('link', { name: /Капучино/ }).click()
+
+  await expect(page.getByRole('heading', { name: 'Капучино' })).toBeVisible()
+  await expect(page.getByText(/эспрессо.*молочн/i)).toBeVisible()
+  await expect(page.getByRole('img', { name: 'Капучино' })).toBeVisible()
+})
+
 test('запрашивает разрешение на уведомления из меню кота', async ({ page }) => {
   await page.addInitScript(() => {
     let permission: NotificationPermission = 'default'

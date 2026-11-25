@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { A11y, Keyboard } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
+import { RouterLink } from 'vue-router'
 
 import 'swiper/css'
 import 'swiper/css/a11y'
 
-import { popularDrinks } from '../model/popularDrinks'
-
-import { DrinkCard } from '@/entities/drink'
+import { DrinkCard, popularDrinks } from '@/entities/drink'
 </script>
 
 <template>
-  <section class="min-h-screen px-4 py-6 pr-0" aria-labelledby="popular-drinks-title">
+  <section
+    id="popular-drinks"
+    class="min-h-screen px-4 py-6 pr-0"
+    aria-labelledby="popular-drinks-title"
+  >
     <h2 id="popular-drinks-title" class="text-xl font-semibold">популярные напитки</h2>
 
     <Swiper
@@ -28,7 +31,12 @@ import { DrinkCard } from '@/entities/drink'
       }"
     >
       <SwiperSlide v-for="drink in popularDrinks" :key="drink.id" class="w-40!">
-        <DrinkCard :drink="drink" />
+        <RouterLink
+          :to="{ name: 'drink-detail', params: { drinkId: drink.id } }"
+          class="block rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+        >
+          <DrinkCard :drink="drink" />
+        </RouterLink>
       </SwiperSlide>
     </Swiper>
   </section>
