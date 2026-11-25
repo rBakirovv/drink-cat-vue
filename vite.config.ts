@@ -33,6 +33,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        importScripts: ['push-handler.js'],
         globPatterns: ['**/*.{html,js,css,ico,svg,png,webmanifest}'],
       },
     }),
