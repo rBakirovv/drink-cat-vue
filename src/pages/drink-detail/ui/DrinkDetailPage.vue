@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ChevronLeft, Plus } from '@lucide/vue'
-import { computed, ref } from 'vue'
+import { ArrowLeft, Plus } from '@lucide/vue'
+import { computed, shallowRef } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import { popularDrinks } from '@/entities/drink'
@@ -13,8 +13,9 @@ const sizes = [
   { label: 'S', volume: 250 },
   { label: 'M', volume: 350 },
   { label: 'L', volume: 450 },
-]
-const selectedSize = ref('M')
+] as const
+const selectedSize = shallowRef<(typeof sizes)[number]>(sizes[1])
+const selectedSizeIndex = computed(() => sizes.indexOf(selectedSize.value))
 const priceFormatter = new Intl.NumberFormat('ru-RU', {
   style: 'currency',
   currency: 'RUB',
@@ -31,10 +32,10 @@ const priceFormatter = new Intl.NumberFormat('ru-RU', {
         <Button
           as-child
           size="icon-lg"
-          class="absolute left-0 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20"
+          class="absolute left-0 rounded-full bg-white text-black hover:bg-neutral-100"
         >
           <RouterLink :to="{ name: 'home', hash: '#popular-drinks' }" aria-label="К напиткам">
-            <ChevronLeft class="size-5" aria-hidden="true" />
+            <ArrowLeft class="size-5" aria-hidden="true" />
           </RouterLink>
         </Button>
         <h1 class="text-center text-2xl leading-tight font-semibold sm:text-3xl">
@@ -58,30 +59,41 @@ const priceFormatter = new Intl.NumberFormat('ru-RU', {
         </div>
 
         <div class="flex items-center gap-2 rounded-[2rem] bg-black/25 p-2 sm:gap-3">
-          <fieldset class="flex min-w-0 flex-1 rounded-full bg-white/10 p-1">
+          <fieldset class="min-w-0 flex-1 rounded-full bg-white/10 p-1">
             <legend class="sr-only">Размер</legend>
-            <label
-              v-for="size in sizes"
-              :key="size.label"
-              class="relative flex min-w-0 flex-1 cursor-pointer"
-            >
-              <input
-                v-model="selectedSize"
-                type="radio"
-                name="drink-size"
-                :value="size.label"
-                :aria-label="`${size.label}, ${size.volume} мл`"
-                class="peer absolute inset-0 z-10 m-0 size-full cursor-pointer opacity-0"
-              />
+            <div class="group relative flex">
               <span
-                class="flex h-12 w-full flex-col items-center justify-center rounded-full leading-tight peer-checked:bg-white peer-checked:text-[#271911] peer-focus-visible:ring-2 peer-focus-visible:ring-white peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#613e2b]"
+                aria-hidden="true"
+                class="pointer-events-none absolute inset-y-0 left-0 z-10 flex flex-col items-center justify-center leading-tight text-[#271911] transition-transform duration-250 ease-out before:absolute before:inset-0 before:-z-10 before:scale-115 before:rounded-full before:bg-white before:shadow-[0_6px_18px_#00000026] group-has-[:focus-visible]:before:outline-2 group-has-[:focus-visible]:before:outline-offset-2 group-has-[:focus-visible]:before:outline-white motion-reduce:transition-none"
+                :style="{
+                  width: `${100 / sizes.length}%`,
+                  transform: `translateX(${selectedSizeIndex * 100}%)`,
+                }"
               >
-                {{ size.label }}
-                <span v-if="selectedSize === size.label" class="text-[11px] whitespace-nowrap">
-                  {{ size.volume }} мл
-                </span>
+                {{ selectedSize.label }}
+                <span class="text-[11px] whitespace-nowrap">{{ selectedSize.volume }} мл</span>
               </span>
-            </label>
+              <label
+                v-for="size in sizes"
+                :key="size.label"
+                class="relative flex min-w-0 flex-1 cursor-pointer"
+              >
+                <input
+                  v-model="selectedSize"
+                  type="radio"
+                  name="drink-size"
+                  :value="size"
+                  :aria-label="`${size.label}, ${size.volume} мл`"
+                  class="peer absolute inset-0 z-20 m-0 size-full cursor-pointer opacity-0"
+                />
+                <span
+                  aria-hidden="true"
+                  class="flex aspect-square w-full items-center justify-center leading-tight peer-checked:invisible"
+                >
+                  {{ size.label }}
+                </span>
+              </label>
+            </div>
           </fieldset>
 
           <Button
