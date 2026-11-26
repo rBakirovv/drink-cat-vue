@@ -14,6 +14,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src/app',
+      filename: 'sw.ts',
       manifest: {
         name: 'Drink Cat',
         short_name: 'Drink Cat',
@@ -32,9 +35,8 @@ export default defineConfig({
           },
         ],
       },
-      workbox: {
-        importScripts: ['push-handler.js'],
-        globPatterns: ['**/*.{html,js,css,ico,svg,png,webmanifest}'],
+      injectManifest: {
+        globPatterns: ['**/*.{html,js,css,ico,svg,png,webmanifest}', 'videos/drink-cat-coffee.mp4'],
       },
     }),
   ],

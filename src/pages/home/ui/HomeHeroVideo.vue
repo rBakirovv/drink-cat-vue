@@ -97,6 +97,7 @@ onScopeDispose(
     ref="video"
     class="h-full w-full object-cover"
     src="/videos/drink-cat-coffee.mp4"
+    crossorigin="anonymous"
     :autoplay="!returnFrame"
     muted
     loop
