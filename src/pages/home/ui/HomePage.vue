@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
 
 import CatMenu from './CatMenu.vue'
+import HomeHeroVideo from './HomeHeroVideo.vue'
 import PhoneDrawer from './PhoneDrawer.vue'
 import PopularDrinks from './PopularDrinks.vue'
 import PwaInstallDialog from './PwaInstallDialog.vue'
@@ -81,14 +82,7 @@ function handleTouchEnd(event: TouchEvent) {
         </div>
       </header>
 
-      <video
-        class="h-full w-full object-cover"
-        src="/videos/drink-cat-coffee.mp4"
-        autoplay
-        muted
-        loop
-        playsinline
-      ></video>
+      <HomeHeroVideo />
       <div
         :style="{ height: `calc(28rem + ${scrollOffset}px)` }"
         aria-hidden="true"

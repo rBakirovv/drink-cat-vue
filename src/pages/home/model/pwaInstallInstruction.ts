@@ -1,8 +1,10 @@
-export function getPwaInstallSteps({ userAgent, maxTouchPoints }: Navigator) {
-  const isMac = /Macintosh/.test(userAgent)
-  const isAppleMobile = /iPhone|iPad|iPod/.test(userAgent) || (isMac && maxTouchPoints > 1)
+import { isAppleMobile } from './isAppleMobile'
 
-  if (isAppleMobile) {
+export function getPwaInstallSteps(browser: Navigator) {
+  const { userAgent } = browser
+  const isMac = /Macintosh/.test(userAgent)
+
+  if (isAppleMobile(browser)) {
     return [
       'Откройте сайт в Safari и нажмите «Поделиться».',
       'Выберите пункт На экран «Домой».',

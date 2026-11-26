@@ -6,6 +6,7 @@
 
 :root {
   --radius: 0.625rem;
+  --drink-card-radius: 1rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -119,5 +120,59 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+}
+
+:root[data-drink-transition='open']::view-transition-group(root),
+:root[data-drink-transition='open']::view-transition-old(root),
+:root[data-drink-transition='open']::view-transition-new(root) {
+  animation: none;
+}
+
+:root[data-drink-transition='open']::view-transition-new(root) {
+  opacity: 0;
+}
+
+::view-transition-group(drink-card),
+::view-transition-group(drink-image) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+::view-transition-image-pair(drink-card) {
+  overflow: clip;
+  animation: drink-card-corners ease-in-out both;
+  animation-duration: inherit;
+}
+
+:root[data-drink-transition='close']::view-transition-image-pair(drink-card) {
+  animation-direction: reverse;
+}
+
+::view-transition-old(drink-card),
+::view-transition-new(drink-card) {
+  height: 100%;
+  animation-direction: normal;
+  animation-duration: 120ms;
+  animation-timing-function: ease-out;
+}
+
+:root[data-drink-transition='close']::view-transition-old(drink-card),
+:root[data-drink-transition='close']::view-transition-new(drink-card) {
+  animation-duration: inherit;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes drink-card-corners {
+  from {
+    border-radius: var(--drink-card-radius);
+  }
+
+  44% {
+    border-radius: calc(2 * var(--drink-card-radius));
+  }
+
+  to {
+    border-radius: 0;
   }
 }
