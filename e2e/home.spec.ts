@@ -36,7 +36,7 @@ test('растягивает карточку и её углы при откры
           if (!group || !effect.pseudoElement) return false
 
           return (
-            effect.getComputedTiming().duration === 420 &&
+            effect.getComputedTiming().duration === 360 &&
             effect
               .getKeyframes()
               .some((frame) => Number.parseFloat(String(frame.width)) === width) &&
