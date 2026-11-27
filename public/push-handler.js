@@ -1,8 +1,8 @@
 async function showPushNotification(data) {
   if (await caches.has('drink-cat-notifications-disabled')) return
 
-  await self.registration.showNotification('Drink Cat', {
-    body: data?.text() || 'Тестовое уведомление',
+  await self.registration.showNotification('Тестовое уведомление', {
+    body: data?.text() ?? '',
   })
 }
 
