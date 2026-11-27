@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+import { fetchPushKey, registerPushSubscription, removePushSubscription } from '../api/push'
+
 import { Button } from '@/shared/ui/button'
 import {
   DropdownMenu,
@@ -15,20 +17,51 @@ const disabledNotificationsCache = 'drink-cat-notifications-disabled'
 const supportsNotifications = 'Notification' in window && 'caches' in window
 const permission = ref(supportsNotifications ? Notification.permission : null)
 const muted = ref(false)
-const notificationsEnabled = computed(() => permission.value === 'granted' && !muted.value)
+const ready = ref(false)
+const registered = ref(false)
+const pushConfigured = ref(false)
+const notificationsEnabled = computed(
+  () =>
+    permission.value === 'granted' && !muted.value && (!pushConfigured.value || registered.value),
+)
 const pending = ref(false)
 const error = ref('')
+let push: { manager: PushManager; key: Uint8Array<ArrayBuffer> } | undefined
+let subscription: PushSubscription | null = null
 
 async function refreshSettings(open: boolean) {
   if (!open || !supportsNotifications || pending.value) return
 
   pending.value = true
+  ready.value = false
   error.value = ''
 
   try {
     permission.value = Notification.permission
     muted.value = await caches.has(disabledNotificationsCache)
+    registered.value = false
+
+    const key = await fetchPushKey()
+    pushConfigured.value = key !== null
+    push = undefined
+    subscription = null
+    if (key && permission.value !== 'denied') {
+      const registration = await navigator.serviceWorker?.getRegistration()
+      if (!registration?.active || !registration.pushManager) {
+        throw new Error('Service worker ещё недоступен')
+      }
+      push = { manager: registration.pushManager, key }
+      subscription = await push.manager.getSubscription()
+
+      if (subscription && !muted.value) {
+        await registerPushSubscription(subscription)
+        registered.value = true
+      }
+    }
+
+    ready.value = true
   } catch {
+    ready.value = push !== undefined
     error.value = 'Не удалось загрузить настройку уведомлений.'
   } finally {
     pending.value = false
@@ -36,27 +69,42 @@ async function refreshSettings(open: boolean) {
 }
 
 async function setNotifications(enabled: boolean) {
-  if (pending.value || !permission.value || permission.value === 'denied') return
+  if (!ready.value || pending.value || !permission.value || permission.value === 'denied') return
 
   pending.value = true
   error.value = ''
 
   try {
-    if (enabled && permission.value === 'default') {
-      permission.value = await Notification.requestPermission()
-    }
-
-    if (permission.value !== 'granted') return
-
     if (enabled) {
+      if (push) {
+        subscription ??= await push.manager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: push.key,
+        })
+        await registerPushSubscription(subscription)
+        registered.value = true
+      } else if (permission.value === 'default') {
+        permission.value = await Notification.requestPermission()
+        if (permission.value !== 'granted') return
+      }
+
       await caches.delete(disabledNotificationsCache)
+      muted.value = false
     } else {
       await caches.open(disabledNotificationsCache)
+      muted.value = true
+      registered.value = false
+      if (subscription) {
+        const { endpoint } = subscription
+        await subscription.unsubscribe()
+        subscription = null
+        await removePushSubscription(endpoint)
+      }
     }
-    muted.value = !enabled
   } catch {
     error.value = 'Не удалось изменить настройку уведомлений. Попробуй ещё раз.'
   } finally {
+    permission.value = Notification.permission
     pending.value = false
   }
 }
@@ -80,7 +128,7 @@ async function setNotifications(enabled: boolean) {
       <DropdownMenuCheckboxItem
         class="justify-between pl-2 [&>span:first-child]:hidden"
         :model-value="notificationsEnabled"
-        :disabled="!permission || permission === 'denied' || pending"
+        :disabled="!ready || !permission || permission === 'denied' || pending"
         @select.prevent
         @update:model-value="setNotifications"
       >
