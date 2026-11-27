@@ -10,14 +10,30 @@ export async function fetchPushKey(): Promise<Uint8Array<ArrayBuffer> | null> {
   return Uint8Array.from(atob(base64), (character) => character.charCodeAt(0))
 }
 
+export async function subscribeToPush(manager: PushManager, key: Uint8Array<ArrayBuffer>) {
+  try {
+    return await manager.subscribe({ userVisibleOnly: true, applicationServerKey: key })
+  } catch (cause) {
+    const reason = cause instanceof DOMException && cause.message ? `: ${cause.message}` : ''
+    throw new Error(`Браузер не создал push-подписку${reason}`, { cause })
+  }
+}
+
 export async function registerPushSubscription(subscription: PushSubscription) {
   const response = await fetch(subscriptionsUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(subscription.toJSON()),
     signal: AbortSignal.timeout(5000),
+  }).catch((cause) => {
+    throw new Error('Не удалось связаться с сервером для регистрации push-подписки.', { cause })
   })
-  if (!response.ok) throw new Error('Не удалось сохранить подписку Web Push')
+
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as { message?: unknown } | null
+    const reason = typeof body?.message === 'string' ? `: ${body.message}` : ''
+    throw new Error(`Сервер отклонил push-подписку (HTTP ${response.status})${reason}`)
+  }
 }
 
 export async function removePushSubscription(endpoint: string) {

@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import { fetchPushKey, registerPushSubscription, removePushSubscription } from '../api/push'
+import {
+  fetchPushKey,
+  registerPushSubscription,
+  removePushSubscription,
+  subscribeToPush,
+} from '../api/push'
 
 import { Button } from '@/shared/ui/button'
 import {
@@ -60,9 +65,10 @@ async function refreshSettings(open: boolean) {
     }
 
     ready.value = true
-  } catch {
+  } catch (cause) {
     ready.value = push !== undefined
-    error.value = 'Не удалось загрузить настройку уведомлений.'
+    error.value =
+      push && cause instanceof Error ? cause.message : 'Не удалось загрузить настройку уведомлений.'
   } finally {
     pending.value = false
   }
@@ -77,10 +83,7 @@ async function setNotifications(enabled: boolean) {
   try {
     if (enabled) {
       if (push) {
-        subscription ??= await push.manager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: push.key,
-        })
+        subscription ??= await subscribeToPush(push.manager, push.key)
         await registerPushSubscription(subscription)
         registered.value = true
       } else if (permission.value === 'default') {
@@ -101,8 +104,11 @@ async function setNotifications(enabled: boolean) {
         await removePushSubscription(endpoint)
       }
     }
-  } catch {
-    error.value = 'Не удалось изменить настройку уведомлений. Попробуй ещё раз.'
+  } catch (cause) {
+    error.value =
+      push && cause instanceof Error
+        ? cause.message
+        : 'Не удалось изменить настройку уведомлений. Попробуй ещё раз.'
   } finally {
     permission.value = Notification.permission
     pending.value = false
@@ -141,14 +147,14 @@ async function setNotifications(enabled: boolean) {
           :model-value="notificationsEnabled"
         />
       </DropdownMenuCheckboxItem>
-      <p v-if="permission === 'denied'" class="px-2 py-1.5 text-xs text-muted-foreground">
+      <p v-if="error" role="status" class="px-2 py-1.5 text-xs text-muted-foreground">
+        {{ error }}
+      </p>
+      <p v-else-if="permission === 'denied'" class="px-2 py-1.5 text-xs text-muted-foreground">
         Разрешите уведомления для этого сайта в настройках браузера.
       </p>
       <p v-else-if="!permission" class="px-2 py-1.5 text-xs text-muted-foreground">
         Уведомления в этом браузере недоступны.
-      </p>
-      <p v-else-if="error" role="status" class="px-2 py-1.5 text-xs text-muted-foreground">
-        {{ error }}
       </p>
     </DropdownMenuContent>
   </DropdownMenu>
