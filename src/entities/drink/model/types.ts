@@ -4,3 +4,7 @@ export interface Drink {
   price: number
   image: string
 }
+
+export interface DrinkDetails extends Drink {
+  description: string
+}

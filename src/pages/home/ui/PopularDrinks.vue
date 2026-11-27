@@ -6,22 +6,39 @@ let previousCatalogPosition: { drinkId: string; slideIndex: number } | undefined
 import type { Swiper as SwiperInstance } from 'swiper'
 import { A11y, Keyboard } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/vue'
-import { watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import 'swiper/css'
 import 'swiper/css/a11y'
 
-import { DrinkCard, drinkViewTransition, popularDrinks } from '@/entities/drink'
+import { DrinkCard, drinkViewTransition, useDrinkCatalog } from '@/entities/drink'
+import { Button } from '@/shared/ui/button'
+
+const catalog = useDrinkCatalog()
+const popularDrinks = computed(() => catalog.popularDrinks)
+const loading = ref(false)
+const failed = ref(false)
+
+async function loadCatalog() {
+  loading.value = true
+  failed.value = false
+  try {
+    await catalog.loadPopularDrinks()
+  } catch {
+    failed.value = true
+  } finally {
+    loading.value = false
+  }
+}
+
+if (!popularDrinks.value) void loadCatalog()
 
 const returningDrinkId = drinkViewTransition.value?.drinkId
 const initialSlide =
   previousCatalogPosition && previousCatalogPosition.drinkId === returningDrinkId
     ? previousCatalogPosition.slideIndex
-    : Math.max(
-        0,
-        popularDrinks.findIndex(({ id }) => id === returningDrinkId),
-      )
+    : Math.max(0, popularDrinks.value?.findIndex(({ id }) => id === returningDrinkId) ?? 0)
 
 let swiper: SwiperInstance | undefined
 
@@ -40,7 +57,14 @@ watch(drinkViewTransition, (transition) => {
   >
     <h2 id="popular-drinks-title" class="text-xl font-semibold pl-6">популярные напитки</h2>
 
+    <p v-if="loading" class="px-6" role="status">Загрузка напитков…</p>
+    <div v-else-if="failed" class="px-6">
+      <p role="alert">Не удалось загрузить каталог</p>
+      <Button class="mt-2" @click="loadCatalog">Повторить</Button>
+    </div>
+    <p v-else-if="!popularDrinks?.length" class="px-6">Пока нет популярных напитков</p>
     <Swiper
+      v-else
       class="mt-4 !pl-6"
       :modules="[A11y, Keyboard]"
       :initial-slide="initialSlide"

@@ -1,3 +1,4 @@
+import process from 'node:process'
 import { fileURLToPath, URL } from 'node:url'
 
 import tailwindcss from '@tailwindcss/vite'
@@ -8,6 +9,11 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    proxy: {
+      '/api': process.env.DRINK_CAT_API_TARGET ?? 'http://127.0.0.1:3000',
+    },
+  },
   plugins: [
     vue(),
     vueDevTools(),

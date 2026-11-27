@@ -1,14 +1,43 @@
 <script setup lang="ts">
 import { ArrowLeft, Plus } from '@lucide/vue'
-import { computed, shallowRef } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
-import { popularDrinks } from '@/entities/drink'
+import { useDrinkCatalog } from '@/entities/drink'
 import { Button } from '@/shared/ui/button'
 
 const props = defineProps<{ drinkId: string }>()
 const router = useRouter()
-const drink = computed(() => popularDrinks.find(({ id }) => id === props.drinkId))
+const catalog = useDrinkCatalog()
+const drink = computed(() => catalog.details.get(props.drinkId))
+const attempt = ref(0)
+const status = ref<'loading' | 'missing' | 'error'>('loading')
+const title = computed(() => {
+  if (drink.value) return drink.value.name
+  if (status.value === 'loading') return 'Загрузка напитка…'
+  if (status.value === 'error') return 'Не удалось загрузить напиток'
+  return 'Напиток не найден'
+})
+
+watch(
+  [() => props.drinkId, attempt],
+  async ([drinkId], _previous, onCleanup) => {
+    if (drink.value) return
+    let active = true
+    onCleanup(() => {
+      active = false
+    })
+
+    status.value = 'loading'
+    try {
+      const result = await catalog.loadDrink(drinkId)
+      if (active && !result) status.value = 'missing'
+    } catch {
+      if (active) status.value = 'error'
+    }
+  },
+  { immediate: true },
+)
 
 let returningToCatalog = false
 
@@ -68,9 +97,13 @@ const priceFormatter = new Intl.NumberFormat('ru-RU', {
           </RouterLink>
         </Button>
         <h1 class="text-center text-2xl leading-tight font-semibold sm:text-3xl">
-          {{ drink?.name ?? 'Напиток не найден' }}
+          {{ title }}
         </h1>
       </header>
+
+      <div v-if="!drink && status === 'error'" class="mt-4 text-center">
+        <Button @click="attempt++">Повторить</Button>
+      </div>
 
       <template v-if="drink">
         <p class="mx-auto mt-4 max-w-xs text-center text-base text-[#f5dfce]">

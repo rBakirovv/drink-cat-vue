@@ -25,3 +25,21 @@ test('воспроизводит фоновое видео при первом �
   })
   expect(rangeStatus).toBe(206)
 })
+
+test('повторно открывает загруженную карточку с фотографией офлайн', async ({ context, page }) => {
+  await page.goto('/drinks/cappuccino')
+  await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true)
+  await page.reload()
+
+  const heading = page.getByRole('heading', { name: 'Капучино' })
+  const image = page.getByRole('img', { name: 'Капучино' })
+  const imageWidth = () => image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+  await expect(heading).toBeVisible()
+  await expect.poll(imageWidth).toBeGreaterThan(0)
+
+  await context.setOffline(true)
+  await page.reload()
+
+  await expect(heading).toBeVisible()
+  await expect.poll(imageWidth).toBeGreaterThan(0)
+})

@@ -11,7 +11,11 @@ test('открывает описание и фото напитка из кат
 
   await expect(page.getByRole('heading', { name: 'Капучино' })).toBeVisible()
   await expect(page.getByText(/эспрессо.*молочн/i)).toBeVisible()
-  await expect(page.getByRole('img', { name: 'Капучино' })).toBeVisible()
+  const image = page.getByRole('img', { name: 'Капучино' })
+  await expect(image).toHaveAttribute('src', '/api/drink-images/cappuccino.png')
+  await expect
+    .poll(() => image.evaluate((element: HTMLImageElement) => element.naturalWidth))
+    .toBeGreaterThan(0)
 })
 
 test('растягивает карточку и её углы при открытии страницы', async ({ page, browserName }) => {
@@ -228,4 +232,29 @@ test('сохраняет выключенные уведомления посл�
   await menu.click()
   await expect(notifications).toBeEnabled()
   await expect(notifications).not.toBeChecked()
+})
+
+test.describe('состояния каталога', () => {
+  test.use({ serviceWorkers: 'block' })
+
+  test('позволяет повторить загрузку после ошибки', async ({ page }) => {
+    const catalogApi = (url: URL) => url.pathname === '/api/drinks'
+    await page.route(catalogApi, (route) => route.fulfill({ status: 503 }), { times: 1 })
+    await page.goto('/')
+    await expect(page.getByRole('alert')).toHaveText('Не удалось загрузить каталог')
+
+    await page.getByRole('button', { name: 'Повторить' }).click()
+
+    await expect(page.getByRole('link', { name: /Капучино/ })).toBeVisible()
+  })
+
+  test('показывает пустой каталог без карточек', async ({ page }) => {
+    await page.route(
+      (url) => url.pathname === '/api/drinks',
+      (route) => route.fulfill({ json: [] }),
+    )
+    await page.goto('/')
+
+    await expect(page.getByText('Пока нет популярных напитков')).toBeVisible()
+  })
 })

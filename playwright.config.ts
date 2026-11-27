@@ -97,14 +97,21 @@ export default defineConfig({
   // outputDir: 'test-results/',
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    /**
-     * Use the dev server by default for faster feedback loop.
-     * Use the preview server on CI for more realistic testing.
-     * Playwright will re-use the local server if there is already a dev-server running.
-     */
-    command: process.env.CI ? 'npm run preview' : 'npm run dev',
-    port: process.env.CI ? 4173 : 5173,
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    ...(process.env.DRINK_CAT_API_TARGET
+      ? []
+      : [
+          {
+            command: 'npm --prefix ../drink-cat-nest run start',
+            url: 'http://127.0.0.1:3000/api/drinks?popular=true',
+            env: { PORT: '3000' },
+            reuseExistingServer: !process.env.CI,
+          },
+        ]),
+    {
+      command: process.env.CI ? 'npm run preview' : 'npm run dev',
+      port: process.env.CI ? 4173 : 5173,
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 })

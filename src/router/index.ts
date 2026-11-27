@@ -2,7 +2,7 @@ import { nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { DrinkDetailPage } from '@/pages/drink-detail'
 import { HomePage } from '@/pages/home'
-import { drinkViewTransition, popularDrinks } from '@/entities/drink'
+import { drinkViewTransition, useDrinkCatalog } from '@/entities/drink'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,7 +37,15 @@ router.beforeResolve(async (to, from) => {
   }
 
   const { drinkId } = (opening ? to : from).params
-  if (typeof drinkId !== 'string' || !popularDrinks.some(({ id }) => id === drinkId)) return
+  if (typeof drinkId !== 'string') return
+  const catalog = useDrinkCatalog()
+  try {
+    if (closing && !catalog.popularDrinks) await catalog.loadPopularDrinks()
+    if (!catalog.popularDrinks?.some(({ id }) => id === drinkId)) return
+    if (!(await catalog.loadDrink(drinkId))) return
+  } catch {
+    return
+  }
 
   const state = { drinkId, direction: opening ? 'open' : 'close' } as const
   drinkViewTransition.value = state

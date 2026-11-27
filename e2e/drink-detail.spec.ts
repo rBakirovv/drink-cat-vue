@@ -11,3 +11,9 @@ test('позволяет выбрать другой размер напитка
   await expect(large).toBeChecked()
   await expect(page.getByRole('button', { name: /250\s*₽/ })).toBeVisible()
 })
+
+test('показывает сообщение для неизвестного напитка', async ({ page }) => {
+  await page.goto('/drinks/unknown')
+
+  await expect(page.getByRole('heading', { name: 'Напиток не найден' })).toBeVisible()
+})
