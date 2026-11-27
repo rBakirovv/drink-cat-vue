@@ -237,15 +237,38 @@ test('сохраняет выключенные уведомления посл�
 test.describe('состояния каталога', () => {
   test.use({ serviceWorkers: 'block' })
 
-  test('позволяет повторить загрузку после ошибки', async ({ page }) => {
-    const catalogApi = (url: URL) => url.pathname === '/api/drinks'
-    await page.route(catalogApi, (route) => route.fulfill({ status: 503 }), { times: 1 })
+  test('показывает скелетоны карточек до загрузки каталога', async ({ page }) => {
+    const response = Promise.withResolvers<void>()
+    await page.route(
+      (url) => url.pathname === '/api/drinks',
+      async (route) => {
+        await response.promise
+        await route.fulfill({ json: [] })
+      },
+    )
     await page.goto('/')
+
+    const loading = page.getByRole('status', { name: 'Загрузка напитков' })
+    try {
+      await expect(loading.locator('[data-slot="drink-card-skeleton"]').nth(1)).toBeVisible()
+      await expect(loading).toHaveText('')
+    } finally {
+      response.resolve()
+    }
+
+    await expect(page.getByText('Пока нет популярных напитков')).toBeVisible()
+    await expect(loading).toHaveCount(0)
+  })
+
+  test('показывает сообщение об ошибке каталога без кнопки повтора', async ({ page }) => {
+    await page.route(
+      (url) => url.pathname === '/api/drinks',
+      (route) => route.fulfill({ status: 503 }),
+    )
+    await page.goto('/')
+
     await expect(page.getByRole('alert')).toHaveText('Не удалось загрузить каталог')
-
-    await page.getByRole('button', { name: 'Повторить' }).click()
-
-    await expect(page.getByRole('link', { name: /Капучино/ })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Повторить' })).toHaveCount(0)
   })
 
   test('показывает пустой каталог без карточек', async ({ page }) => {

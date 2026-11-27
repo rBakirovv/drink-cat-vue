@@ -13,7 +13,6 @@ import 'swiper/css'
 import 'swiper/css/a11y'
 
 import { DrinkCard, drinkViewTransition, useDrinkCatalog } from '@/entities/drink'
-import { Button } from '@/shared/ui/button'
 
 const catalog = useDrinkCatalog()
 const popularDrinks = computed(() => catalog.popularDrinks)
@@ -57,11 +56,30 @@ watch(drinkViewTransition, (transition) => {
   >
     <h2 id="popular-drinks-title" class="text-xl font-semibold pl-6">популярные напитки</h2>
 
-    <p v-if="loading" class="px-6" role="status">Загрузка напитков…</p>
-    <div v-else-if="failed" class="px-6">
-      <p role="alert">Не удалось загрузить каталог</p>
-      <Button class="mt-2" @click="loadCatalog">Повторить</Button>
+    <div
+      v-if="loading"
+      class="mt-4 flex gap-3 overflow-hidden pl-6 motion-safe:animate-pulse"
+      role="status"
+      aria-label="Загрузка напитков"
+    >
+      <div
+        v-for="card in 8"
+        :key="card"
+        data-slot="drink-card-skeleton"
+        aria-hidden="true"
+        class="w-40 shrink-0 rounded-(--drink-card-radius) bg-white p-3"
+      >
+        <div class="mb-2 flex h-6 items-center">
+          <div class="h-4 w-24 rounded-md bg-neutral-200"></div>
+        </div>
+        <div class="mb-3 aspect-square rounded-lg bg-neutral-100"></div>
+        <div class="flex items-center justify-between">
+          <div class="h-4 w-12 rounded-md bg-neutral-200"></div>
+          <div class="size-8 rounded-full bg-neutral-100"></div>
+        </div>
+      </div>
     </div>
+    <p v-else-if="failed" class="px-6" role="alert">Не удалось загрузить каталог</p>
     <p v-else-if="!popularDrinks?.length" class="px-6">Пока нет популярных напитков</p>
     <Swiper
       v-else
