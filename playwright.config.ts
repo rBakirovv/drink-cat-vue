@@ -34,7 +34,9 @@ export default defineConfig({
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173',
+    baseURL:
+      process.env.DRINK_CAT_E2E_URL ??
+      (process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173'),
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -97,21 +99,23 @@ export default defineConfig({
   // outputDir: 'test-results/',
 
   /* Run your local dev server before starting the tests */
-  webServer: [
-    ...(process.env.DRINK_CAT_API_TARGET
-      ? []
-      : [
-          {
-            command: 'npm --prefix ../drink-cat-nest run start',
-            url: 'http://127.0.0.1:3000/api/drinks?popular=true',
-            env: { PORT: '3000' },
-            reuseExistingServer: !process.env.CI,
-          },
-        ]),
-    {
-      command: process.env.CI ? 'npm run preview' : 'npm run dev',
-      port: process.env.CI ? 4173 : 5173,
-      reuseExistingServer: !process.env.CI,
-    },
-  ],
+  webServer: process.env.DRINK_CAT_E2E_URL
+    ? undefined
+    : [
+        ...(process.env.DRINK_CAT_API_TARGET
+          ? []
+          : [
+              {
+                command: 'npm --prefix ../drink-cat-nest run start',
+                url: 'http://127.0.0.1:3000/api/drinks?popular=true',
+                env: { PORT: '3000' },
+                reuseExistingServer: !process.env.CI,
+              },
+            ]),
+        {
+          command: process.env.CI ? 'npm run preview' : 'npm run dev',
+          port: process.env.CI ? 4173 : 5173,
+          reuseExistingServer: !process.env.CI,
+        },
+      ],
 })

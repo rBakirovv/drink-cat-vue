@@ -47,6 +47,16 @@ Vite проксирует `/api` на `http://127.0.0.1:3000`. Чтобы исп
 
 Чтобы открыть приложение на телефоне, подключи телефон и компьютер к одной сети Wi-Fi и открой на телефоне адрес из строки `Network` в выводе Vite.
 
+## Docker и GitLab CI
+
+[Dockerfile](Dockerfile) собирает Vue и упаковывает `dist` в непривилегированный контейнер Nginx. [Nginx](nginx.conf) отдаёт статику и service worker, а `/api/*` проксирует в сервис `api:3000`. Общий `compose.prod.yml` для Vue и NestJS лежит в `drink-cat-nest`.
+
+[GitLab CI](.gitlab-ci.yml) запускает проверки на раннере `docker-build` и публикует образ основной ветки в Container Registry с тегом полного коммита. Для проверки PWA поверх уже запущенных контейнеров используй:
+
+```sh
+CI=1 DRINK_CAT_E2E_URL=http://127.0.0.1:8080 npm run test:e2e -- --project=chromium
+```
+
 ## Команды
 
 | Команда | Что делает |

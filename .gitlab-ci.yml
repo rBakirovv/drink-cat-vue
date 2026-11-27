@@ -1,0 +1,36 @@
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+
+stages:
+  - check
+  - build
+
+default:
+  tags: [docker-build]
+
+check:
+  stage: check
+  image: node:24-alpine
+  rules:
+    - when: on_success
+  script:
+    - npm ci
+    - npm run type-check
+    - ./node_modules/.bin/oxlint .
+    - ./node_modules/.bin/eslint .
+    - ./node_modules/.bin/oxfmt --check src/
+    - npm run test:unit -- --run
+
+publish_image:
+  stage: build
+  image: docker:27-cli
+  script:
+    - printf '%s\n' "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" .
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
